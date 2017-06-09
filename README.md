@@ -3,6 +3,55 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+## Project submission
+The project is about implementing a Model Predictive Controller (MPC) to steer a car around a track in simulator. From the simulator the real time telemetry data about current position and orientation of a car are provided to the controller. A reference trajectory is defined as a set of waypoints. The MPC computes the trajectory, actuations and sends it back to the simulator.
+
+### The Model
+For this project a kinematic bicycle model is chosen. The model is non-linear with no dynamics like inertia or torque. The model is defined as:
+
+      x[t+1] = x[t] + v[t] * cos(psi[t]) * dt
+      y[t+1] = y[t] + v[t] * sin(psi[t]) * dt
+      psi[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
+      v[t+1] = v[t] + a[t] * dt
+      cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
+      epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+where:
+- `x, y` - position vectors
+- `psi` - heading direction vector
+- `v` - velocity vector
+- `cte` - cross-track error vector
+- `epsi` - orientation error vector
+- `Lf` - the distance between the center of mass of the vehicle and the front wheels.
+
+### Timestep Length and Elapsed Duration (N & dt)
+The timestep length `N` and elapsed duration `dt` are the key parameters defining the prediction horizon `H = N * dt`. Longer prediction horizon provides smoother car control. Short prediction horizon makes car to drive less accurate and be more responsive to the controller.
+
+For the final submission the values `N = 15` and `dt = 0.05` were chosen empirically. Smooth and responsive car driving around the simulator track was achieved with the speed up to 69 mph.
+
+### Polynomial Fitting and MPC Preprocessing
+The waypoints are transformed to vehicle coordinate system by translation and rotation. X axis aligns with the heading direction. This transformation allows to perform calculations consistently in vehicle coordinate system.
+
+      X' = (ptsx[i] - px) * cos(psi) + (ptsy[i] - py) * sin(psi);
+      Y' = (ptsy[i] - py) * cos(psi) - (ptsx[i] - px) * sin(psi);
+where: `X', Y'` - new coordinates of a waypoint in vehicle coordinate system.
+
+This transformation allows to set the current car position and orientation to 0 since the car is at the origin of the coordinate system. So, we set the initial state as:
+
+    state << 0, 0, 0, v, cte, epsi
+
+Then a third order polynomial is fitted to the waypoints.    
+
+### Model Predictive Control with Latency
+To handle the latency problem in the controller, which may cause oscillations and poor trajectories, an additional latency of 100ms is added before sending actuations to the simulator.
+I decided to apply actuations after the latency period. which means skipping of the first 2 actuations/time steps (100 ms): `.05 * 2 = .1`
+
+The optimal trajectory is computed as:
+
+      Trajectory solution = mpc.Solve(state, coeffs);
+      double steer_value = solution.Delta.at(2);
+      double throttle_value= solution.A.at(2);
+
+
 ## Dependencies
 
 * cmake >= 3.5
@@ -19,7 +68,7 @@ Self-Driving Car Engineer Nanodegree Program
   * Run either `install-mac.sh` or `install-ubuntu.sh`.
   * If you install from source, checkout to commit `e94b6e1`, i.e.
     ```
-    git clone https://github.com/uWebSockets/uWebSockets 
+    git clone https://github.com/uWebSockets/uWebSockets
     cd uWebSockets
     git checkout e94b6e1
     ```
@@ -31,7 +80,7 @@ Self-Driving Car Engineer Nanodegree Program
   * Mac: `brew install ipopt`
   * Linux
     * You will need a version of Ipopt 3.12.1 or higher. The version available through `apt-get` is 3.11.x. If you can get that version to work great but if not there's a script `install_ipopt.sh` that will install Ipopt. You just need to download the source from the Ipopt [releases page](https://www.coin-or.org/download/source/Ipopt/) or the [Github releases](https://github.com/coin-or/Ipopt/releases) page.
-    * Then call `install_ipopt.sh` with the source directory as the first argument, ex: `bash install_ipopt.sh Ipopt-3.12.1`. 
+    * Then call `install_ipopt.sh` with the source directory as the first argument, ex: `bash install_ipopt.sh Ipopt-3.12.1`.
   * Windows: TODO. If you can use the Linux subsystem and follow the Linux instructions.
 * [CppAD](https://www.coin-or.org/CppAD/)
   * Mac: `brew install cppad`
