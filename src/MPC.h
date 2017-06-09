@@ -6,7 +6,7 @@
 
 using namespace std;
 
-struct Solution {
+struct Trajectory {
   vector<double> X;
   vector<double> Y;
   vector<double> Delta;
@@ -22,7 +22,7 @@ public:
   
   // Solve the model given an initial state and polynomial coefficients.
   // Return the first actuatotions.
-  Solution Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs);
+  Trajectory Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs);
 };
 
 #endif /* MPC_H */

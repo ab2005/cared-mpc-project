@@ -7,7 +7,7 @@ using CppAD::AD;
 
 // DONE: Set the timestep length and duration
 size_t N = 15;
-double dt = 0.1;
+double dt = .05;
 
 size_t x_start = 0;
 size_t y_start = x_start + N;
@@ -18,9 +18,9 @@ size_t epsi_start = cte_start + N;
 size_t delta_start = epsi_start + N;
 size_t a_start = delta_start + N - 1;
 
-double ref_cte = 2.0;
-double ref_epsi = 20.;
-double ref_v = 70;
+double ref_cte = 0.;
+double ref_epsi = 0.;
+double ref_v = 64.;
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -135,7 +135,7 @@ class FG_eval {
 MPC::MPC() {}
 MPC::~MPC() {}
 
-Solution MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
+Trajectory MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   typedef CPPAD_TESTVECTOR(double) Dvector;
 
   // DONE: Set the number of model variables (includes both states and inputs).
@@ -251,18 +251,18 @@ Solution MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
 
   // DONE: Return the first actuator values. The variables can be accessed with
   // `solution.x[i]`.
-  Solution sol;
+  Trajectory traj;
   
   if (ok) {
     auto cost = solution.obj_value;
     std::cout << "Cost " << cost << std::endl;
     for (auto i = 0; i < N - 1; i++) {
-      sol.X.push_back(solution.x[x_start + i]);
-      sol.Y.push_back(solution.x[y_start + i]);
-      sol.Delta.push_back(solution.x[delta_start + i]);
-      sol.A.push_back(solution.x[a_start + i]);
+      traj.X.push_back(solution.x[x_start + i]);
+      traj.Y.push_back(solution.x[y_start + i]);
+      traj.Delta.push_back(solution.x[delta_start + i]);
+      traj.A.push_back(solution.x[a_start + i]);
     }
   }
-  sol.status = ok;
-  return sol;
+  traj.status = ok;
+  return traj;
 }

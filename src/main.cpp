@@ -139,7 +139,7 @@ int main() {
           state << 0, 0, 0, v, cte, epsi;
           
           // compute the optimal trajectory
-          Solution solution = mpc.Solve(state, coeffs);
+          Trajectory solution = mpc.Solve(state, coeffs);
           
           double steer_value = solution.Delta.at(2);
           double throttle_value= solution.A.at(2);

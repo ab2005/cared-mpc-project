@@ -26,7 +26,7 @@ where:
 ### Timestep Length and Elapsed Duration (N & dt)
 The timestep length `N` and elapsed duration `dt` are the key parameters defining the prediction horizon `H = N * dt`. Longer prediction horizon provides smoother car control. Short prediction horizon makes car to drive less accurate and be more responsive to the controller.
 
-For the final submission the values `N = 15` and `dt = 0.05` were chosen empirically. Smooth and responsive car driving around the simulator track was achieved with the speed up to 69 mph.
+For the final submission the values `N = 15` and `dt = 0.05` were chosen empirically. Smooth and responsive car driving around the simulator track was achieved with the speed up to 60.25 mph.
 
 ### Polynomial Fitting and MPC Preprocessing
 The waypoints are transformed to vehicle coordinate system by translation and rotation. X axis aligns with the heading direction. This transformation allows to perform calculations consistently in vehicle coordinate system.
